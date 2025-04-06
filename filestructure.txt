@@ -1,0 +1,50 @@
+|-- .gitattributes
+|-- .gitignore
+|-- .mvn
+    |-- wrapper
+        |-- maven-wrapper.properties
+|-- HELP.md
+|-- mvnw
+|-- mvnw.cmd
+|-- pom.xml
+|-- src
+    |-- main
+        |-- java
+            |-- com
+                |-- eventbooking
+                    |-- config
+                        |-- JWTAuthenticationFilter.java
+                        |-- JWTConfig.java
+                        |-- SecurityConfig.java
+                    |-- controller
+                        |-- AuthController.java
+                    |-- dto
+                        |-- OTPVerifyDTO.java
+                        |-- SignupRequestDTO.java
+                    |-- eventbooking
+                    |-- EventbookingApplication.java
+                    |-- exception
+                    |-- mapper
+                    |-- model
+                        |-- Role.java
+                        |-- User.java
+                    |-- repository
+                        |-- RoleRepository.java
+                        |-- UserRepository.java
+                    |-- service
+                        |-- impl
+                            |-- JWTServiceImpl.java
+                            |-- OTPServiceImpl.java
+                            |-- UserServiceImpl.java
+                        |-- JWTService.java
+                        |-- OTPService.java
+                        |-- UserService.java
+        |-- resources
+            |-- application.properties
+            |-- static
+            |-- templates
+    |-- test
+        |-- java
+            |-- com
+                |-- eventbooking
+                    |-- EventbookingApplicationTests.java
