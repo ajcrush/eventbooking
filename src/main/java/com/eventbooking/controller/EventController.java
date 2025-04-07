@@ -3,12 +3,18 @@ package com.eventbooking.controller;
 
 import com.eventbooking.model.Event;
 import com.eventbooking.model.User;
+import com.eventbooking.service.CloudinaryService;
 import com.eventbooking.service.EventService;
 import com.eventbooking.service.UserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.security.RolesAllowed;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
 
@@ -18,29 +24,62 @@ public class EventController {
 
     private final EventService eventService;
     private final UserService userService;
+    private final CloudinaryService cloudinaryService;
 
     public EventController(EventService eventService,
-                           UserService userService) {
+                           UserService userService,
+                           CloudinaryService cloudinaryService) {
         this.eventService = eventService;
         this.userService = userService;
+        this.cloudinaryService = cloudinaryService;
     }
 
-    @PostMapping
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @RolesAllowed("ADMIN")
-    public ResponseEntity<Event> createEvent(@RequestBody Event event,
-                                             Principal principal) {
+    public ResponseEntity<Event> createEvent(
+            @RequestPart("event") String eventJson,
+            @RequestPart("poster") MultipartFile poster,
+            Principal principal) {
+
+        System.out.println("📥 Raw JSON: " + eventJson);
+
+        Event event;
+        try {
+            event = objectMapper.readValue(eventJson, Event.class);
+        } catch (Exception e) {
+            System.out.println("❌ Failed to parse event JSON: " + e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+
         User user = userService.getUserFromPrincipal(principal);
-        System.out.println("Creating event by user: " + user.getEmail());
+
+        try {
+            String imageUrl = cloudinaryService.uploadFile(poster);
+            event.setPoster(imageUrl);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+
         Event saved = eventService.createEvent(event, user);
-        System.out.println("Saved event with ID: " + saved.getId());
         return ResponseEntity.ok(saved);
     }
 
-    @PutMapping("/{id}")
+
+
+
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @RolesAllowed("ADMIN")
     public ResponseEntity<Event> updateEvent(@PathVariable Long id,
-                                             @RequestBody Event event) {
-        return ResponseEntity.ok(eventService.updateEvent(id, event));
+                                             @RequestPart("event") Event updatedEvent,
+                                             @RequestPart(value = "poster", required = false) MultipartFile poster) throws IOException {
+        if (poster != null && !poster.isEmpty()) {
+            String newPosterUrl = cloudinaryService.uploadFile(poster);
+            updatedEvent.setPoster(newPosterUrl);
+        }
+        return ResponseEntity.ok(eventService.updateEvent(id, updatedEvent));
     }
 
     @DeleteMapping("/{id}")
@@ -52,9 +91,7 @@ public class EventController {
 
     @GetMapping
     public ResponseEntity<List<Event>> getAllEvents() {
-        List<Event> events = eventService.getAllEvents();
-        System.out.println("Found events: " + events.size());
-        return ResponseEntity.ok(events);
+        return ResponseEntity.ok(eventService.getAllEvents());
     }
 
     @GetMapping("/{id}")
