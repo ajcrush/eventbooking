@@ -29,8 +29,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/signup",
-                                "/api/auth/verify-otp"
+                                "/api/auth/verify-otp",
+                                "/api/auth/login",
+                                "/api/events",             // Allow public access to view events
+                                "/api/events/**"           // Optional: allow specific GETs
                         ).permitAll()
+                        .requestMatchers("/api/events/**").hasRole("ADMIN") // Admin-only create/update/delete
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

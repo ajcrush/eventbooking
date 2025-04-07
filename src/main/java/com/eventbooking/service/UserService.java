@@ -3,6 +3,7 @@ package com.eventbooking.service;
 import com.eventbooking.dto.SignupRequestDTO;
 import com.eventbooking.model.User;
 
+import java.security.Principal;
 import java.util.Map;
 
 public interface UserService {
@@ -12,4 +13,5 @@ public interface UserService {
     void deleteUser(String emailOrMobile);
     User verifyEmailChangeOtp(String email, String otp);
     User authenticateUser(String emailOrMobile, String password);
+    User getUserFromPrincipal(Principal principal);
 }

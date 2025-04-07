@@ -12,6 +12,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,8 +28,10 @@ public class UserServiceImpl implements UserService {
     // In-memory temp storage for users pending OTP verification
     private final Map<String, SignupRequestDTO> tempUsers = new HashMap<>();
 
-    public UserServiceImpl(UserRepository userRepo, RoleRepository roleRepo,
-                           OTPService otpService, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepo,
+                           RoleRepository roleRepo,
+                           OTPService otpService,
+                           PasswordEncoder passwordEncoder) {
         this.userRepo = userRepo;
         this.roleRepo = roleRepo;
         this.otpService = otpService;
@@ -41,25 +44,22 @@ public class UserServiceImpl implements UserService {
         if (userRepo.existsByEmail(dto.getEmail())) {
             throw new RuntimeException("Email already registered");
         }
-
         if (userRepo.existsByMobileNumber(dto.getMobileNumber())) {
             throw new RuntimeException("Mobile number already registered");
         }
 
-        // Store in memory and generate OTP
         tempUsers.put(dto.getEmail(), dto);
-        otpService.generateAndSendOTP(dto.getEmail()); // Can also use mobile
+        otpService.generateAndSendOTP(dto.getEmail());
     }
 
     @Override
     @Transactional
     public User verifyOtp(String emailOrMobile, String otp) {
-        boolean isValid = otpService.verifyOTP(emailOrMobile, otp);
-        if (!isValid) {
+        if (!otpService.verifyOTP(emailOrMobile, otp)) {
             throw new RuntimeException("Invalid or expired OTP");
         }
 
-        SignupRequestDTO dto = tempUsers.get(emailOrMobile);
+        SignupRequestDTO dto = tempUsers.remove(emailOrMobile);
         if (dto == null) {
             throw new RuntimeException("No signup request found for this identifier");
         }
@@ -75,7 +75,6 @@ public class UserServiceImpl implements UserService {
         user.setVerified(true);
         user.setRoles(Collections.singleton(role));
 
-        tempUsers.remove(emailOrMobile);
         return userRepo.save(user);
     }
 
@@ -88,7 +87,6 @@ public class UserServiceImpl implements UserService {
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new RuntimeException("Invalid credentials");
         }
-
         return user;
     }
 
@@ -108,8 +106,8 @@ public class UserServiceImpl implements UserService {
         if (newMobile != null) user.setMobileNumber(newMobile);
 
         if (newEmail != null && !newEmail.equals(user.getEmail())) {
-            // Store new email temporarily and send OTP
-            tempUsers.put(newEmail, new SignupRequestDTO(user.getName(), newEmail, "", user.getMobileNumber(), "USER"));
+            tempUsers.put(newEmail, new SignupRequestDTO(
+                    user.getName(), newEmail, "", user.getMobileNumber(), "USER"));
             otpService.generateAndSendOTP(newEmail);
             return null; // Signal OTP pending
         }
@@ -125,25 +123,32 @@ public class UserServiceImpl implements UserService {
 
         user.getRoles().clear();
         userRepo.save(user);
-
         userRepo.delete(user);
     }
 
-
     @Override
     public User verifyEmailChangeOtp(String email, String otp) {
-        boolean valid = otpService.verifyOTP(email, otp);
-        if (!valid) throw new RuntimeException("Invalid or expired OTP");
+        if (!otpService.verifyOTP(email, otp)) {
+            throw new RuntimeException("Invalid or expired OTP");
+        }
 
-        SignupRequestDTO dto = tempUsers.get(email);
-        if (dto == null) throw new RuntimeException("No pending email update request");
+        SignupRequestDTO dto = tempUsers.remove(email);
+        if (dto == null) {
+            throw new RuntimeException("No pending email update request");
+        }
 
         User user = userRepo.findByMobileNumber(dto.getMobileNumber())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         user.setEmail(dto.getEmail());
-        tempUsers.remove(email);
         return userRepo.save(user);
     }
 
+    @Override
+    public User getUserFromPrincipal(Principal principal) {
+        String email = principal.getName();
+        System.out.println("email : " + email);
+        return userRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
 }

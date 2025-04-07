@@ -1,7 +1,14 @@
 package com.eventbooking.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 public class SignupRequestDTO {
 
+    // Setters
+    // Getters
     private String name;
     private String email;
     private String password;
@@ -19,45 +26,4 @@ public class SignupRequestDTO {
         this.role = role;
     }
 
-    // Getters
-    public String getName() {
-        return name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public String getMobileNumber() {
-        return mobileNumber;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    // Setters
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setMobileNumber(String mobileNumber) {
-        this.mobileNumber = mobileNumber;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
 }

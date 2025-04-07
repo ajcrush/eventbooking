@@ -18,7 +18,10 @@
                         |-- SecurityConfig.java
                     |-- controller
                         |-- AuthController.java
+                        |-- EventController.java
                     |-- dto
+                        |-- EventDTO.java
+                        |-- EventRequestDTO.java
                         |-- LoginRequestDTO.java
                         |-- OTPVerifyDTO.java
                         |-- SignupRequestDTO.java
@@ -27,13 +30,17 @@
                     |-- exception
                     |-- mapper
                     |-- model
+                        |-- Event.java
                         |-- Role.java
                         |-- User.java
                     |-- repository
+                        |-- EventRepository.java
                         |-- RoleRepository.java
                         |-- UserRepository.java
                     |-- service
+                        |-- EventService.java
                         |-- impl
+                            |-- EventServiceImpl.java
                             |-- JWTServiceImpl.java
                             |-- OTPServiceImpl.java
                             |-- UserServiceImpl.java

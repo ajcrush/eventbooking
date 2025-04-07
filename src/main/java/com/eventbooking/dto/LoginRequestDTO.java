@@ -1,16 +1,26 @@
 package com.eventbooking.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
 public class LoginRequestDTO {
-
-    @NotBlank
     private String emailOrMobile;
-
-    @NotBlank
     private String password;
+
+    // Getter
+    public String getEmailOrMobile() {
+        return emailOrMobile;
+    }
+
+    // Setter
+    public void setEmailOrMobile(String emailOrMobile) {
+        this.emailOrMobile = emailOrMobile;
+    }
+
+    // Getter
+    public String getPassword() {
+        return password;
+    }
+
+    // Setter
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }

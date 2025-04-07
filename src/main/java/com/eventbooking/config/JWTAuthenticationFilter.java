@@ -47,14 +47,33 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
         if (token != null) {
             String email = jwtService.extractUsername(token);
-            var user = userRepository.findByEmail(email).orElse(null);
+            System.out.println("email : " + email);
+            if (email != null) {
+                var userOptional = userRepository.findByEmail(email);
 
-            if (user != null && jwtService.isTokenValid(token, user)) {
-                var auth = new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList());
-                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(auth);
+                if (userOptional.isPresent()) {
+                    var user = userOptional.get();
+
+                    if (jwtService.isTokenValid(token, user)) {
+                        var auth = new UsernamePasswordAuthenticationToken(
+                                user.getEmail(),    // <-- principal is now the email string
+                                null,
+                                Collections.emptyList()
+                        );
+
+                        auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(auth);
+                    } else {
+                        System.out.println("JWT token is not valid for user: " + email);
+                    }
+                } else {
+                    System.out.println("No user found with email: " + email);
+                }
+            } else {
+                System.out.println("Could not extract email from token.");
             }
         }
+
 
         filterChain.doFilter(request, response);
     }
