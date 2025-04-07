@@ -106,6 +106,18 @@ public class AuthController {
             return ResponseEntity.badRequest().body(errorResponse(e.getMessage()));
         }
     }
+    
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, Object>> logout(HttpServletResponse response) {
+        Cookie cookie = new Cookie("jwt", null);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0); // delete the cookie
+        response.addCookie(cookie);
+
+        return ResponseEntity.ok(successResponse("User logged out successfully.", null));
+    }
+
 
 
     private Map<String, Object> successResponse(String message, User user) {
