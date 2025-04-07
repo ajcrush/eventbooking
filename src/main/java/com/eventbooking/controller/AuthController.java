@@ -30,12 +30,18 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<Map<String, Object>> signup(@Valid @RequestBody SignupRequestDTO request) {
         try {
+            // Disallow signup for role ADMIN
+            if ("ADMIN".equalsIgnoreCase(request.getRole())) {
+                return ResponseEntity.status(403).body(errorResponse("Admin signup is not allowed."));
+            }
+
             userService.registerUser(request);
             return ResponseEntity.ok(successResponse("OTP sent to email or mobile. Please verify.", null));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(errorResponse(e.getMessage()));
         }
     }
+
 
     @PostMapping("/verify-otp")
     public ResponseEntity<Map<String, Object>> verifyOtp(@Valid @RequestBody OTPVerifyDTO request, HttpServletResponse response) {
@@ -106,7 +112,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(errorResponse(e.getMessage()));
         }
     }
-    
+
     @PostMapping("/logout")
     public ResponseEntity<Map<String, Object>> logout(HttpServletResponse response) {
         Cookie cookie = new Cookie("jwt", null);
