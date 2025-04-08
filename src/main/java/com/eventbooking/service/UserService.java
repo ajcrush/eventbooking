@@ -14,4 +14,5 @@ public interface UserService {
     User verifyEmailChangeOtp(String email, String otp);
     User authenticateUser(String emailOrMobile, String password);
     User getUserFromPrincipal(Principal principal);
+    void changePassword(String emailOrMobile, String currentPassword, String newPassword);
 }

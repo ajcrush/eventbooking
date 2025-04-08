@@ -151,4 +151,20 @@ public class UserServiceImpl implements UserService {
         return userRepo.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
+
+    @Override
+    @Transactional
+    public void changePassword(String emailOrMobile, String currentPassword, String newPassword) {
+        User user = userRepo.findByEmail(emailOrMobile)
+                .orElseGet(() -> userRepo.findByMobileNumber(emailOrMobile)
+                        .orElseThrow(() -> new RuntimeException("User not found")));
+
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new RuntimeException("Current password is incorrect");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepo.save(user);
+    }
+
 }

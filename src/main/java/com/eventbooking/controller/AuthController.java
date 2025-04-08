@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -124,7 +125,27 @@ public class AuthController {
         return ResponseEntity.ok(successResponse("User logged out successfully.", null));
     }
 
+    @GetMapping("/user/me")
+    public ResponseEntity<Map<String, Object>> getCurrentUser(Principal principal) {
+        User user = userService.getUserFromPrincipal(principal);
+        Map<String, Object> response = new HashMap<>();
+        response.put("user", user);
+        return ResponseEntity.ok(response);
+    }
 
+    @PostMapping("/change-password")
+    public ResponseEntity<Map<String, Object>> changePassword(@RequestBody Map<String, String> body) {
+        try {
+            String emailOrMobile = body.get("emailOrMobile");
+            String currentPassword = body.get("currentPassword");
+            String newPassword = body.get("newPassword");
+
+            userService.changePassword(emailOrMobile, currentPassword, newPassword);
+            return ResponseEntity.ok(successResponse("Password changed successfully", null));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(errorResponse(e.getMessage()));
+        }
+    }
 
     private Map<String, Object> successResponse(String message, User user) {
         Map<String, Object> map = new HashMap<>();
