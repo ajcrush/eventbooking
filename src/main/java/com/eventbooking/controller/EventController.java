@@ -73,14 +73,25 @@ public class EventController {
     @PutMapping(value = "/update/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @RolesAllowed("ADMIN")
     public ResponseEntity<Event> updateEvent(@PathVariable Long id,
-                                             @RequestPart("event") Event updatedEvent,
+                                             @RequestPart("event") String eventJson,  // Receive event as JSON string
                                              @RequestPart(value = "poster", required = false) MultipartFile poster) throws IOException {
+
+        // Deserialize the event JSON string into the Event object
+        ObjectMapper objectMapper = new ObjectMapper();
+        Event updatedEvent = objectMapper.readValue(eventJson, Event.class);
+
+        // If a new poster is uploaded, upload it and set the URL
         if (poster != null && !poster.isEmpty()) {
             String newPosterUrl = cloudinaryService.uploadFile(poster);
             updatedEvent.setPoster(newPosterUrl);
         }
-        return ResponseEntity.ok(eventService.updateEvent(id, updatedEvent));
+
+        // Call the service layer to update the event
+        Event updated = eventService.updateEvent(id, updatedEvent);
+
+        return ResponseEntity.ok(updated);
     }
+
 
     @DeleteMapping("/{id}")
     @RolesAllowed("ADMIN")

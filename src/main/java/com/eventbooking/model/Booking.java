@@ -1,6 +1,8 @@
 package com.eventbooking.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -11,9 +13,12 @@ public class Booking {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "event_id", nullable = false)
+    @JsonIgnore
     private Event event;
 
     @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     private int seatsBooked;
@@ -22,7 +27,7 @@ public class Booking {
     private String status; // CREATED, PAID, FAILED
     private LocalDateTime createdAt;
 
-    // Getters and Setters
+    // === Getters and Setters ===
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

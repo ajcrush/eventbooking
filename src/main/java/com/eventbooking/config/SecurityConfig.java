@@ -8,8 +8,8 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -31,8 +31,8 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Apply CORS config
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeRequests(auth -> auth
+                .csrf(AbstractHttpConfigurer::disable) // Disable CSRF for stateless authentication
+                .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/signup",
                                 "/api/auth/verify-otp",
@@ -46,7 +46,7 @@ public class SecurityConfig {
                                 "/api/auth/change-password"
                         ).permitAll()
                         .requestMatchers("/api/events/**").hasRole("ADMIN") // Only admins can access events-related APIs
-                        .anyRequest().authenticated()
+                        .anyRequest().authenticated() // Any other request should be authenticated
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -67,8 +67,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(Arrays.asList("http://localhost:5173")); // React app's origin
-        config.addAllowedOriginPattern("http://localhost:5173"); // React app's origin (Pattern)
+//        config.setAllowedHeaders(Arrays.asList("*")); // or list all required headers explicitly
+      config.addAllowedOriginPattern("*"); // React app's origin (Pattern)
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")); // Add DELETE method here
         config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type")); // Necessary headers for your requests
 
@@ -76,5 +76,4 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", config); // Apply CORS config to all endpoints
         return source;
     }
-
 }

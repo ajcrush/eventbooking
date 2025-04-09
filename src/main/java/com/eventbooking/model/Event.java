@@ -1,9 +1,9 @@
-// src/main/java/com/eventbooking/model/Event.java
 package com.eventbooking.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "events")
@@ -22,7 +22,7 @@ public class Event {
     private String city;
     private String state;
     private Integer seats;
-    private Integer seatsLeft;      // ← new field
+    private Integer seatsLeft;
     private Double price;
     private LocalDate date;
     private boolean online;
@@ -30,8 +30,12 @@ public class Event {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @JsonIgnore                   // ← hide creator details in JSON
+    @JsonIgnore
     private User createdBy;
+
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore // optional: prevent infinite recursion in JSON serialization
+    private List<Booking> bookings;
 
     // === Getters & Setters ===
 
@@ -82,4 +86,7 @@ public class Event {
 
     public User getCreatedBy() { return createdBy; }
     public void setCreatedBy(User createdBy) { this.createdBy = createdBy; }
+
+    public List<Booking> getBookings() { return bookings; }
+    public void setBookings(List<Booking> bookings) { this.bookings = bookings; }
 }

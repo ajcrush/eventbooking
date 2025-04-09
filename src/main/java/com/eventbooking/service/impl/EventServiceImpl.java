@@ -1,10 +1,8 @@
-// src/main/java/com/eventbooking/service/impl/EventServiceImpl.java
-package com.eventbooking.service.impl;
+package com.eventbooking.service;
 
 import com.eventbooking.model.Event;
 import com.eventbooking.model.User;
 import com.eventbooking.repository.EventRepository;
-import com.eventbooking.service.EventService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -14,6 +12,7 @@ public class EventServiceImpl implements EventService {
 
     private final EventRepository eventRepo;
 
+    // Constructor injection
     public EventServiceImpl(EventRepository eventRepo) {
         this.eventRepo = eventRepo;
     }
@@ -32,10 +31,18 @@ public class EventServiceImpl implements EventService {
     public Event updateEvent(Long id, Event updatedEvent) {
         Event existing = eventRepo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Event not found"));
-        // preserve id and creator
+
+        // Preserve id and createdBy fields
         updatedEvent.setId(existing.getId());
         updatedEvent.setCreatedBy(existing.getCreatedBy());
-        // you may also adjust seatsLeft here if seats changed
+
+        // Optionally adjust seatsLeft if seats have changed
+        if (updatedEvent.getSeatsLeft() != existing.getSeatsLeft()) {
+            // Logic to adjust seatsLeft (for example, ensure it doesn't go below 0)
+            updatedEvent.setSeatsLeft(updatedEvent.getSeatsLeft());
+        }
+
+        // Save updated event
         return eventRepo.save(updatedEvent);
     }
 

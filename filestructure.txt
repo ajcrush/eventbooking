@@ -17,6 +17,7 @@
                         |-- JWTAuthenticationFilter.java
                         |-- JWTConfig.java
                         |-- SecurityConfig.java
+                        |-- WebConfiguration.java
                     |-- controller
                         |-- AuthController.java
                         |-- BookingController.java

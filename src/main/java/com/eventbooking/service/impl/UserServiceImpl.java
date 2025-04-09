@@ -48,6 +48,7 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Mobile number already registered");
         }
 
+        // Store the temporary user for email verification
         tempUsers.put(dto.getEmail(), dto);
         otpService.generateAndSendOTP(dto.getEmail());
     }
@@ -79,21 +80,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User authenticateUser(String emailOrMobile, String password) {
-        User user = userRepo.findByEmail(emailOrMobile)
-                .orElseGet(() -> userRepo.findByMobileNumber(emailOrMobile)
-                        .orElseThrow(() -> new RuntimeException("User not found")));
-
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
-        }
-        return user;
-    }
-
-    @Override
     @Transactional
     public User updateUser(Map<String, String> updates) {
-        String emailOrMobile = updates.get("emailOrMobile");
+        String emailOrMobile = updates.get("emailOrMobile"); // Ensure this is passed as "emailOrMobile"
         User user = userRepo.findByEmail(emailOrMobile)
                 .orElseGet(() -> userRepo.findByMobileNumber(emailOrMobile)
                         .orElseThrow(() -> new RuntimeException("User not found")));
@@ -102,31 +91,32 @@ public class UserServiceImpl implements UserService {
         String newMobile = updates.get("mobileNumber");
         String newEmail = updates.get("email");
 
-        if (newName != null) user.setName(newName);
-        if (newMobile != null) user.setMobileNumber(newMobile);
+        // Check if new name is provided and update it
+        if (newName != null && !newName.isEmpty()) {
+            user.setName(newName);
+        }
 
+        // Check if new mobile number is provided and update it
+        if (newMobile != null && !newMobile.isEmpty()) {
+            user.setMobileNumber(newMobile); // Set new mobile number
+        }
+
+        // If new email is provided and it's different from the current one, start email change process
         if (newEmail != null && !newEmail.equals(user.getEmail())) {
             tempUsers.put(newEmail, new SignupRequestDTO(
                     user.getName(), newEmail, "", user.getMobileNumber(), "USER"));
             otpService.generateAndSendOTP(newEmail);
-            return null; // Signal OTP pending
+            return null; // OTP verification required for email change
         }
 
+        // Save and return updated user
         return userRepo.save(user);
     }
 
+
+
     @Override
     @Transactional
-    public void deleteUser(String email) {
-        User user = userRepo.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
-
-        user.getRoles().clear();
-        userRepo.save(user);
-        userRepo.delete(user);
-    }
-
-    @Override
     public User verifyEmailChangeOtp(String email, String otp) {
         if (!otpService.verifyOTP(email, otp)) {
             throw new RuntimeException("Invalid or expired OTP");
@@ -145,9 +135,31 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User authenticateUser(String emailOrMobile, String password) {
+        User user = userRepo.findByEmail(emailOrMobile)
+                .orElseGet(() -> userRepo.findByMobileNumber(emailOrMobile)
+                        .orElseThrow(() -> new RuntimeException("User not found")));
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new RuntimeException("Invalid credentials");
+        }
+        return user;
+    }
+
+    @Override
+    @Transactional
+    public void deleteUser(String email) {
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+
+        user.getRoles().clear();
+        userRepo.save(user);
+        userRepo.delete(user);
+    }
+
+    @Override
     public User getUserFromPrincipal(Principal principal) {
         String email = principal.getName();
-        System.out.println("email : " + email);
         return userRepo.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
@@ -166,5 +178,4 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepo.save(user);
     }
-
 }

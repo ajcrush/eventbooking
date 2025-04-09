@@ -43,7 +43,6 @@ public class AuthController {
         }
     }
 
-
     @PostMapping("/verify-otp")
     public ResponseEntity<Map<String, Object>> verifyOtp(@Valid @RequestBody OTPVerifyDTO request, HttpServletResponse response) {
         User user = userService.verifyOtp(request.getEmailOrMobile(), request.getOtp());
@@ -102,7 +101,6 @@ public class AuthController {
             return ResponseEntity.badRequest().body(errorResponse(e.getMessage()));
         }
     }
-
 
     @DeleteMapping("/delete")
     public ResponseEntity<Map<String, Object>> deleteUser(@RequestParam String email) {

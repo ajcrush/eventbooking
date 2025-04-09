@@ -1,4 +1,3 @@
-// src/main/java/com/eventbooking/service/EventService.java
 package com.eventbooking.service;
 
 import com.eventbooking.model.Event;
