@@ -70,7 +70,7 @@ public class EventController {
 
 
 
-    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/update/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @RolesAllowed("ADMIN")
     public ResponseEntity<Event> updateEvent(@PathVariable Long id,
                                              @RequestPart("event") Event updatedEvent,

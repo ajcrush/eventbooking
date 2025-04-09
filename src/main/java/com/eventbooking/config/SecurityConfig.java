@@ -30,9 +30,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Apply CORS config
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth
+                .authorizeRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/signup",
                                 "/api/auth/verify-otp",
@@ -45,7 +45,7 @@ public class SecurityConfig {
                                 "/api/auth/verify-email-change",
                                 "/api/auth/change-password"
                         ).permitAll()
-                        .requestMatchers("/api/events/**").hasRole("ADMIN")
+                        .requestMatchers("/api/events/**").hasRole("ADMIN") // Only admins can access events-related APIs
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
@@ -67,13 +67,13 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-//        config.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
-        config.addAllowedOriginPattern("http://localhost:5173");
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+        config.setAllowedOrigins(Arrays.asList("http://localhost:5173")); // React app's origin
+        config.addAllowedOriginPattern("http://localhost:5173"); // React app's origin (Pattern)
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")); // Add DELETE method here
+        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type")); // Necessary headers for your requests
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
+        source.registerCorsConfiguration("/**", config); // Apply CORS config to all endpoints
         return source;
     }
 
