@@ -3,6 +3,7 @@ package com.eventbooking.service;
 import com.eventbooking.model.Event;
 import com.eventbooking.model.User;
 import com.eventbooking.repository.EventRepository;
+import com.eventbooking.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -11,10 +12,12 @@ import java.util.List;
 public class EventServiceImpl implements EventService {
 
     private final EventRepository eventRepo;
+    private final UserRepository userRepository;
 
     // Constructor injection
-    public EventServiceImpl(EventRepository eventRepo) {
+    public EventServiceImpl(EventRepository eventRepo, UserRepository userRepository) {
         this.eventRepo = eventRepo;
+        this.userRepository = userRepository;
     }
 
     @Override

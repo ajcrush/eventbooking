@@ -30,23 +30,30 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Apply CORS config
-                .csrf(AbstractHttpConfigurer::disable) // Disable CSRF for stateless authentication
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        // Publicly accessible endpoints
                         .requestMatchers(
                                 "/api/auth/signup",
                                 "/api/auth/verify-otp",
                                 "/api/auth/login",
                                 "/api/auth/logout",
+                                "/api/auth/update",
+                                "/api/auth/verify-email-change",
+                                "/api/auth/change-password",
                                 "/api/user/me",
                                 "/api/events",
                                 "/api/events/**",
-                                "/api/auth/update",
-                                "/api/auth/verify-email-change",
-                                "/api/auth/change-password"
+                                "/api/bookings/my-booked-events",
+                                "/api/bookings/**"
                         ).permitAll()
-                        .requestMatchers("/api/events/**").hasRole("ADMIN") // Only admins can access events-related APIs
-                        .anyRequest().authenticated() // Any other request should be authenticated
+
+                        // Admin-only event management APIs
+                        .requestMatchers("/api/admin/events/**").hasRole("ADMIN")
+
+                        // All other requests must be authenticated
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -67,13 +74,12 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-//        config.setAllowedHeaders(Arrays.asList("*")); // or list all required headers explicitly
-      config.addAllowedOriginPattern("*"); // React app's origin (Pattern)
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")); // Add DELETE method here
-        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type")); // Necessary headers for your requests
+        config.addAllowedOriginPattern("*");
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config); // Apply CORS config to all endpoints
+        source.registerCorsConfiguration("/**", config);
         return source;
     }
 }

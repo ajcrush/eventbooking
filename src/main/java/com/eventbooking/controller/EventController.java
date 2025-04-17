@@ -1,4 +1,3 @@
-// src/main/java/com/eventbooking/controller/EventController.java
 package com.eventbooking.controller;
 
 import com.eventbooking.model.Event;
@@ -26,6 +25,9 @@ public class EventController {
     private final UserService userService;
     private final CloudinaryService cloudinaryService;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     public EventController(EventService eventService,
                            UserService userService,
                            CloudinaryService cloudinaryService) {
@@ -33,9 +35,6 @@ public class EventController {
         this.userService = userService;
         this.cloudinaryService = cloudinaryService;
     }
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @RolesAllowed("ADMIN")
@@ -67,31 +66,22 @@ public class EventController {
         return ResponseEntity.ok(saved);
     }
 
-
-
-
     @PutMapping(value = "/update/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @RolesAllowed("ADMIN")
     public ResponseEntity<Event> updateEvent(@PathVariable Long id,
-                                             @RequestPart("event") String eventJson,  // Receive event as JSON string
+                                             @RequestPart("event") String eventJson,
                                              @RequestPart(value = "poster", required = false) MultipartFile poster) throws IOException {
 
-        // Deserialize the event JSON string into the Event object
-        ObjectMapper objectMapper = new ObjectMapper();
         Event updatedEvent = objectMapper.readValue(eventJson, Event.class);
 
-        // If a new poster is uploaded, upload it and set the URL
         if (poster != null && !poster.isEmpty()) {
             String newPosterUrl = cloudinaryService.uploadFile(poster);
             updatedEvent.setPoster(newPosterUrl);
         }
 
-        // Call the service layer to update the event
         Event updated = eventService.updateEvent(id, updatedEvent);
-
         return ResponseEntity.ok(updated);
     }
-
 
     @DeleteMapping("/{id}")
     @RolesAllowed("ADMIN")

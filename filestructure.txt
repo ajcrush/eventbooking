@@ -23,6 +23,7 @@
                         |-- BookingController.java
                         |-- EventController.java
                     |-- dto
+                        |-- BookingDTO.java
                         |-- EventDTO.java
                         |-- EventRequestDTO.java
                         |-- LoginRequestDTO.java
