@@ -127,6 +127,7 @@ public class AuthController {
     public ResponseEntity<Map<String, Object>> getCurrentUser(Principal principal) {
         User user = userService.getUserFromPrincipal(principal);
         Map<String, Object> response = new HashMap<>();
+        System.out.println(user);
         response.put("user", user);
         return ResponseEntity.ok(response);
     }

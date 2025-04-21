@@ -63,7 +63,7 @@ public class BookingController {
         }
 
         int amount = (int) (event.getPrice() * seats);
-        Order order = razorpayService.createOrder(amount);
+        Order order = razorpayService.createOrder(amount*100);
 
         Booking booking = new Booking();
         booking.setEvent(event);

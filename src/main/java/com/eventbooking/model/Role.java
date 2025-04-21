@@ -20,6 +20,7 @@ public class Role {
 
     public enum RoleName {
         ROLE_USER,
-        ROLE_ADMIN
+        ROLE_ADMIN,
+        ROLE_MANAGER // New role added
     }
 }

@@ -46,7 +46,8 @@ public class SecurityConfig {
                                 "/api/events",
                                 "/api/events/**",
                                 "/api/bookings/my-booked-events",
-                                "/api/bookings/**"
+                                "/api/bookings/**",
+                                "/api/bookings/fail"
                         ).permitAll()
 
                         // Admin-only event management APIs
